@@ -39,11 +39,73 @@ const winner = game.isCheckmate()
     : "White"
   : null;
 
+  const isDraw = game.isDraw();
+  
+
+let gameResult: string | null = null;
+
+if (game.isCheckmate()) {
+  gameResult = `${winner} wins by checkmate!`;
+} else if (game.isStalemate()) {
+  gameResult = "Draw by stalemate";
+} else if (game.isThreefoldRepetition()) {
+  gameResult = "Draw by threefold repetition";
+} else if (game.isInsufficientMaterial()) {
+  gameResult = "Draw by insufficient material";
+} else if (isDraw) {
+  gameResult = "Draw";
+}
+const [pendingPromotion, setPendingPromotion] = useState<{
+  from: string;
+  to: string;
+} | null>(null);
 function resetGame() {
   setGame(new Chess());
   setSelectedSquare(null);
   setMoveSquares({});
   setLastMove(null);
+  setPendingPromotion(null);
+}
+
+function undoMove() {
+  const history = game.history({ verbose: true });
+
+  if (history.length === 0) {
+    return;
+  }
+
+  // Remove the latest move
+  const remainingMoves = history.slice(0, -1);
+
+  // Create a fresh game and replay all remaining moves
+  const newGame = new Chess();
+
+  remainingMoves.forEach((move) => {
+    newGame.move({
+      from: move.from,
+      to: move.to,
+      promotion: move.promotion,
+    });
+  });
+
+  setGame(newGame);
+
+  // Update last-move highlight
+  const previousMove = remainingMoves[remainingMoves.length - 1];
+
+  if (previousMove) {
+    setLastMove({
+      from: previousMove.from,
+      to: previousMove.to,
+    });
+  } else {
+    setLastMove(null);
+  }
+
+  // Clear any active selections
+  setSelectedSquare(null);
+  setMoveSquares({});
+  setPendingPromotion(null);
 }
 
 function getMoveOptions(square: string) {
@@ -74,11 +136,30 @@ function getMoveOptions(square: string) {
   return true;
 }
 
-  function makeMove(sourceSquare: string, targetSquare: string) {
+  function makeMove(
+  sourceSquare: string,
+  targetSquare: string,
+  promotion?: "q" | "r" | "b" | "n",
+) {
+  const piece = game.get(sourceSquare as any);
+
+  const isPromotion =
+    piece?.type === "p" &&
+    ((piece.color === "w" && targetSquare.endsWith("8")) ||
+      (piece.color === "b" && targetSquare.endsWith("1")));
+
+  if (isPromotion && !promotion) {
+    setPendingPromotion({
+      from: sourceSquare,
+      to: targetSquare,
+    });
+
+    return false;
+  }
+
   try {
     const gameCopy = new Chess();
 
-    // Replay all previous moves to preserve history
     game.history().forEach((move) => {
       gameCopy.move(move);
     });
@@ -86,7 +167,7 @@ function getMoveOptions(square: string) {
     const move = gameCopy.move({
       from: sourceSquare,
       to: targetSquare,
-      promotion: "q",
+      promotion,
     });
 
     if (move === null) {
@@ -102,6 +183,7 @@ function getMoveOptions(square: string) {
 
     setSelectedSquare(null);
     setMoveSquares({});
+    setPendingPromotion(null);
 
     return true;
   } catch {
@@ -122,14 +204,14 @@ function getMoveOptions(square: string) {
         </p>
       </div>
 
-      {game.isCheckmate() && (
+      {gameResult && (
   <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-center text-white">
     <p className="text-sm font-semibold uppercase tracking-widest text-red-400">
-      Checkmate
+      Game Over
     </p>
 
     <p className="mt-1 text-2xl font-bold">
-      {winner} wins! ♚
+      {gameResult}
     </p>
   </div>
 )}
@@ -239,12 +321,22 @@ function getMoveOptions(square: string) {
   <div className="mb-4 flex items-center justify-between">
   <h2 className="text-lg font-semibold">Move History</h2>
 
+    <div className="flex gap-2">
+    <button
+      onClick={undoMove}
+      disabled={moveHistory.length === 0}
+      className="cursor-pointer rounded-md bg-zinc-700 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      Undo
+    </button>
+
   <button
     onClick={resetGame}
     className="cursor-pointer rounded-md bg-zinc-700 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-zinc-600"
   >
     New Game
   </button>
+</div>
 </div>
 
   {moveHistory.length === 0 ? (
@@ -277,6 +369,42 @@ function getMoveOptions(square: string) {
 
     </div>
   </div>
+
+  {pendingPromotion && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div className="rounded-xl bg-zinc-900 p-6 text-white shadow-2xl">
+      <h2 className="mb-4 text-center text-lg font-semibold">
+        Promote your pawn
+      </h2>
+
+      <div className="flex gap-3">
+        {[
+          { type: "q" as const, symbol: "♛", label: "Queen" },
+          { type: "r" as const, symbol: "♜", label: "Rook" },
+          { type: "b" as const, symbol: "♝", label: "Bishop" },
+          { type: "n" as const, symbol: "♞", label: "Knight" },
+        ].map((piece) => (
+          <button
+            key={piece.type}
+            onClick={() =>
+              makeMove(
+                pendingPromotion.from,
+                pendingPromotion.to,
+                piece.type,
+              )
+            }
+            className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-lg bg-zinc-800 transition hover:bg-zinc-700"
+          >
+            <span className="text-4xl">{piece.symbol}</span>
+            <span className="mt-1 text-xs text-zinc-400">
+              {piece.label}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
 </main>
   );
 }
