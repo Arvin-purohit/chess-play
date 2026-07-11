@@ -33,6 +33,19 @@ const capturedByBlack = verboseHistory
   q: "♛",
 };
 
+const winner = game.isCheckmate()
+  ? game.turn() === "w"
+    ? "Black"
+    : "White"
+  : null;
+
+function resetGame() {
+  setGame(new Chess());
+  setSelectedSquare(null);
+  setMoveSquares({});
+  setLastMove(null);
+}
+
 function getMoveOptions(square: string) {
   const moves = game.moves({
     square: square as any,
@@ -108,6 +121,18 @@ function getMoveOptions(square: string) {
           {game.turn() === "w" ? "White" : "Black"}
         </p>
       </div>
+
+      {game.isCheckmate() && (
+  <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-center text-white">
+    <p className="text-sm font-semibold uppercase tracking-widest text-red-400">
+      Checkmate
+    </p>
+
+    <p className="mt-1 text-2xl font-bold">
+      {winner} wins! ♚
+    </p>
+  </div>
+)}
 
       <div>
         <p className="text-sm text-zinc-400">Check</p>
@@ -211,7 +236,16 @@ function getMoveOptions(square: string) {
 
       {/* Move History */}
       <div className="h-[500px] w-[300px] overflow-y-auto rounded-lg bg-zinc-900 p-4 text-white">
-  <h2 className="mb-4 text-lg font-semibold">Move History</h2>
+  <div className="mb-4 flex items-center justify-between">
+  <h2 className="text-lg font-semibold">Move History</h2>
+
+  <button
+    onClick={resetGame}
+    className="cursor-pointer rounded-md bg-zinc-700 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-zinc-600"
+  >
+    New Game
+  </button>
+</div>
 
   {moveHistory.length === 0 ? (
     <p className="text-sm text-zinc-500">No moves yet</p>
