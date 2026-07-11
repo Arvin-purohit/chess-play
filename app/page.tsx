@@ -15,6 +15,24 @@ export default function Home() {
 
 const moveHistory = game.history();
 
+const verboseHistory = game.history({ verbose: true });
+
+const capturedByWhite = verboseHistory
+  .filter((move) => move.color === "w" && move.captured)
+  .map((move) => move.captured!);
+
+const capturedByBlack = verboseHistory
+  .filter((move) => move.color === "b" && move.captured)
+  .map((move) => move.captured!);
+
+  const pieceSymbols: Record<string, string> = {
+  p: "♟",
+  n: "♞",
+  b: "♝",
+  r: "♜",
+  q: "♛",
+};
+
 function getMoveOptions(square: string) {
   const moves = game.moves({
     square: square as any,
@@ -111,6 +129,19 @@ function getMoveOptions(square: string) {
 
       {/* Chessboard */}
       <div className="w-full max-w-[500px]">
+
+
+        <div className="mb-2 flex min-h-8 items-center gap-1 text-2xl text-white">
+  <span className="mr-2 text-sm text-zinc-400">Black captured:</span>
+
+  {capturedByBlack.length === 0 ? (
+    <span className="text-sm text-zinc-600">None</span>
+  ) : (
+    capturedByBlack.map((piece, index) => (
+      <span key={index}>{pieceSymbols[piece]}</span>
+    ))
+  )}
+</div>
         <Chessboard
           options={{
             position: game.fen(),
@@ -164,6 +195,18 @@ function getMoveOptions(square: string) {
             },
           }}
         />
+
+        <div className="mt-2 flex min-h-8 items-center gap-1 text-2xl text-white">
+  <span className="mr-2 text-sm text-zinc-400">White captured:</span>
+
+  {capturedByWhite.length === 0 ? (
+    <span className="text-sm text-zinc-600">None</span>
+  ) : (
+    capturedByWhite.map((piece, index) => (
+      <span key={index}>{pieceSymbols[piece]}</span>
+    ))
+  )}
+</div>
       </div>
 
       {/* Move History */}
