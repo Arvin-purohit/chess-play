@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect , useState } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
@@ -12,6 +12,18 @@ export default function Home() {
   from: string;
   to: string;
 } | null>(null);
+
+const INITIAL_TIME = 10 * 60; // 10 minutes
+
+const [whiteTime, setWhiteTime] = useState(INITIAL_TIME);
+const [blackTime, setBlackTime] = useState(INITIAL_TIME);
+
+const [activePlayer, setActivePlayer] = useState<"w" | "b">("w");
+
+const [isClockRunning, setIsClockRunning] = useState(true);
+
+const [winnerByTime, setWinnerByTime] =
+  useState<"w" | "b" | null>(null);
 
 const moveHistory = game.history();
 
@@ -65,6 +77,12 @@ function resetGame() {
   setMoveSquares({});
   setLastMove(null);
   setPendingPromotion(null);
+
+  setWhiteTime(INITIAL_TIME);
+setBlackTime(INITIAL_TIME);
+setActivePlayer("w");
+setIsClockRunning(true);
+setWinnerByTime(null);
 }
 
 function undoMove() {
@@ -176,6 +194,10 @@ function getMoveOptions(square: string) {
 
     setGame(gameCopy);
 
+    // Switch the chess clock to the next player
+setActivePlayer(gameCopy.turn());
+
+
     setLastMove({
       from: sourceSquare,
       to: targetSquare,
@@ -191,6 +213,51 @@ function getMoveOptions(square: string) {
   }
 }
 
+useEffect(() => {
+  if (game.isGameOver()) {
+    setIsClockRunning(false);
+  }
+}, [game]);
+
+useEffect(() => {
+  if (!isClockRunning) return;
+
+  const interval = setInterval(() => {
+    if (activePlayer === "w") {
+      setWhiteTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setWinnerByTime("b");
+          setIsClockRunning(false);
+          return 0;
+        }
+
+        return prev - 1;
+      });
+    } else {
+      setBlackTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setWinnerByTime("w");
+          setIsClockRunning(false);
+          return 0;
+        }
+
+        return prev - 1;
+      });
+    }
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [activePlayer, isClockRunning]);
+
+
+function formatTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  return `${minutes}:${secs.toString().padStart(2, "0")}`;
+}
   return (
 <main className="min-h-screen bg-zinc-950 px-4 py-6">
   <div className="mx-auto max-w-[900px]">
@@ -236,6 +303,19 @@ function getMoveOptions(square: string) {
 
       {/* Chessboard */}
       <div className="w-full max-w-[500px]">
+        <div
+  className={`mb-3 flex items-center justify-between rounded-lg border p-4 transition-all ${
+    activePlayer === "b"
+      ? "border-green-500 bg-zinc-800 shadow-lg shadow-green-500/20"
+      : "border-zinc-700 bg-zinc-900"
+  }`}
+>
+  <span className="text-lg font-semibold text-white">Black</span>
+
+  <span className="font-mono text-3xl font-bold text-white">
+    {formatTime(blackTime)}
+  </span>
+</div>
 
 
         <div className="mb-2 flex min-h-8 items-center gap-1 text-2xl text-white">
@@ -302,6 +382,20 @@ function getMoveOptions(square: string) {
             },
           }}
         />
+
+        <div
+  className={`mt-3 flex items-center justify-between rounded-lg border p-4 transition-all ${
+    activePlayer === "w"
+      ? "border-green-500 bg-zinc-800 shadow-lg shadow-green-500/20"
+      : "border-zinc-700 bg-zinc-900"
+  }`}
+>
+  <span className="text-lg font-semibold text-white">White</span>
+
+  <span className="font-mono text-3xl font-bold text-white">
+    {formatTime(whiteTime)}
+  </span>
+</div>
 
         <div className="mt-2 flex min-h-8 items-center gap-1 text-2xl text-white">
   <span className="mr-2 text-sm text-zinc-400">White captured:</span>
