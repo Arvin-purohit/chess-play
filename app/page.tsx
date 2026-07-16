@@ -18,8 +18,9 @@ const [selectedTime, setSelectedTime] = useState(10);
 const [gameStarted, setGameStarted] = useState(false);
 
 const INITIAL_TIME = selectedTime * 60;
-const [whiteTime, setWhiteTime] = useState(INITIAL_TIME);
-const [blackTime, setBlackTime] = useState(INITIAL_TIME);
+const [whiteTime, setWhiteTime] = useState(10 * 60);
+const [blackTime, setBlackTime] = useState(10 * 60);
+
 
 const [activePlayer, setActivePlayer] = useState<"w" | "b">("w");
 
@@ -90,17 +91,26 @@ const [pendingPromotion, setPendingPromotion] = useState<{
   to: string;
 } | null>(null);
 function resetGame() {
-  setGame(new Chess());
+  const newGame = new Chess();
+
+  setGame(newGame);
+
   setSelectedSquare(null);
   setMoveSquares({});
   setLastMove(null);
   setPendingPromotion(null);
 
-  setWhiteTime(INITIAL_TIME);
-setBlackTime(INITIAL_TIME);
-setActivePlayer("w");
-setIsClockRunning(true);
-setWinnerByTime(null);
+  const initialSeconds = selectedTime * 60;
+
+  setWhiteTime(initialSeconds);
+  setBlackTime(initialSeconds);
+
+  setActivePlayer("w");
+  setWinnerByTime(null);
+  setIsClockRunning(true);
+
+  // Return to the time selection screen
+  setGameStarted(false);
 }
 
 function startGame() {
@@ -296,8 +306,11 @@ if (!gameStarted) {
       <div className="w-full max-w-4xl rounded-2xl bg-zinc-900 p-8 shadow-2xl">
 
         <h1 className="mb-2 text-center text-5xl font-bold text-white">
-          ♟ Chess
+          ♟ Chess Arena
         </h1>
+        <p className="mb-8 text-center text-zinc-400">
+    Choose your battle
+</p>
 
         <p className="mb-8 text-center text-zinc-400">
           Choose your time control
@@ -316,19 +329,29 @@ if (!gameStarted) {
             <button
               key={item.time}
               onClick={() => setSelectedTime(item.time)}
-              className={`rounded-xl border p-6 transition-all duration-200 ${
-                selectedTime === item.time
-                  ? "border-green-500 bg-green-500/10"
-                  : "border-zinc-700 bg-zinc-800 hover:bg-zinc-700"
-              }`}
+             className={`group rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 hover:scale-105 ${
+  selectedTime === item.time
+    ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/30"
+    : "border-zinc-700 bg-zinc-800 hover:border-zinc-500 hover:bg-zinc-700"
+}`}
             >
-              <p className="text-sm uppercase tracking-widest text-zinc-400">
-                {item.title}
-              </p>
+             <div className="flex items-center justify-center gap-2 text-zinc-400">
+    <span className="text-lg">⚡</span>
+
+    <span className="text-sm uppercase tracking-widest">
+        {item.title}
+    </span>
+</div>
 
               <p className="mt-2 text-4xl font-bold text-white">
                 {item.time} min
+
               </p>
+              {selectedTime === item.time && (
+    <p className="mt-3 text-sm font-semibold text-green-400">
+        ✓ Selected
+    </p>
+)}
             </button>
           ))}
 
@@ -336,8 +359,24 @@ if (!gameStarted) {
 
         <button
           onClick={startGame}
-          className="mt-8 w-full rounded-xl bg-green-600 py-4 text-xl font-bold text-white transition hover:bg-green-500"
-        >
+className="
+mt-8
+w-full
+rounded-2xl
+bg-gradient-to-r
+from-green-600
+to-green-500
+py-4
+text-xl
+font-bold
+text-white
+transition-all
+duration-300
+hover:scale-[1.02]
+hover:shadow-xl
+hover:shadow-green-500/40
+active:scale-95
+"        >
           Start Game
         </button>
 
