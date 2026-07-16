@@ -9,12 +9,15 @@ export default function Home() {
   const [moveSquares, setMoveSquares] = useState<Record<string, React.CSSProperties>>({});
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [lastMove, setLastMove] = useState<{
+  
   from: string;
   to: string;
 } | null>(null);
 
-const INITIAL_TIME = 10 * 60; // 10 minutes
+const [selectedTime, setSelectedTime] = useState(10);
+const [gameStarted, setGameStarted] = useState(false);
 
+const INITIAL_TIME = selectedTime * 60;
 const [whiteTime, setWhiteTime] = useState(INITIAL_TIME);
 const [blackTime, setBlackTime] = useState(INITIAL_TIME);
 
@@ -56,9 +59,24 @@ const winner = game.isCheckmate()
 
 let gameResult: string | null = null;
 
-if (game.isCheckmate()) {
+if (winnerByTime) {
+  gameResult =
+    winnerByTime === "w"
+      ? "White wins on time!"
+      : "Black wins on time!";
+} else if (game.isCheckmate()) {
   gameResult = `${winner} wins by checkmate!`;
 } else if (game.isStalemate()) {
+  gameResult = "Draw by stalemate";
+} else if (game.isThreefoldRepetition()) {
+  gameResult = "Draw by threefold repetition";
+} else if (game.isInsufficientMaterial()) {
+  gameResult = "Draw by insufficient material";
+} else if (isDraw) {
+  gameResult = "Draw";
+}
+
+ if (game.isStalemate()) {
   gameResult = "Draw by stalemate";
 } else if (game.isThreefoldRepetition()) {
   gameResult = "Draw by threefold repetition";
@@ -83,6 +101,19 @@ setBlackTime(INITIAL_TIME);
 setActivePlayer("w");
 setIsClockRunning(true);
 setWinnerByTime(null);
+}
+
+function startGame() {
+  const initialSeconds = selectedTime * 60;
+
+  setWhiteTime(initialSeconds);
+  setBlackTime(initialSeconds);
+
+  setActivePlayer("w");
+  setWinnerByTime(null);
+  setIsClockRunning(true);
+
+  setGameStarted(true);
 }
 
 function undoMove() {
@@ -257,6 +288,62 @@ function formatTime(seconds: number) {
   const secs = seconds % 60;
 
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
+}
+
+if (!gameStarted) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+      <div className="w-full max-w-4xl rounded-2xl bg-zinc-900 p-8 shadow-2xl">
+
+        <h1 className="mb-2 text-center text-5xl font-bold text-white">
+          ♟ Chess
+        </h1>
+
+        <p className="mb-8 text-center text-zinc-400">
+          Choose your time control
+        </p>
+
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+
+          {[
+            { title: "Bullet", time: 1 },
+            { title: "Blitz", time: 3 },
+            { title: "Blitz", time: 5 },
+            { title: "Rapid", time: 10 },
+            { title: "Rapid", time: 15 },
+            { title: "Rapid", time: 30 },
+          ].map((item) => (
+            <button
+              key={item.time}
+              onClick={() => setSelectedTime(item.time)}
+              className={`rounded-xl border p-6 transition-all duration-200 ${
+                selectedTime === item.time
+                  ? "border-green-500 bg-green-500/10"
+                  : "border-zinc-700 bg-zinc-800 hover:bg-zinc-700"
+              }`}
+            >
+              <p className="text-sm uppercase tracking-widest text-zinc-400">
+                {item.title}
+              </p>
+
+              <p className="mt-2 text-4xl font-bold text-white">
+                {item.time} min
+              </p>
+            </button>
+          ))}
+
+        </div>
+
+        <button
+          onClick={startGame}
+          className="mt-8 w-full rounded-xl bg-green-600 py-4 text-xl font-bold text-white transition hover:bg-green-500"
+        >
+          Start Game
+        </button>
+
+      </div>
+    </main>
+  );
 }
   return (
 <main className="min-h-screen bg-zinc-950 px-4 py-6">
