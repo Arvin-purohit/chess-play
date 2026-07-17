@@ -3,6 +3,7 @@
 import { useEffect , useState } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
+import { RotateCcw, RotateCw, RefreshCw } from "lucide-react";
 
 export default function Home() {
   const [game, setGame] = useState(() => new Chess());
@@ -14,10 +15,13 @@ export default function Home() {
   to: string;
 } | null>(null);
 
+
+const [boardOrientation, setBoardOrientation] = useState<"white" | "black">(
+  "white"
+);
 const [selectedTime, setSelectedTime] = useState(10);
 const [gameStarted, setGameStarted] = useState(false);
 
-const INITIAL_TIME = selectedTime * 60;
 const [whiteTime, setWhiteTime] = useState(10 * 60);
 const [blackTime, setBlackTime] = useState(10 * 60);
 
@@ -77,15 +81,7 @@ if (winnerByTime) {
   gameResult = "Draw";
 }
 
- if (game.isStalemate()) {
-  gameResult = "Draw by stalemate";
-} else if (game.isThreefoldRepetition()) {
-  gameResult = "Draw by threefold repetition";
-} else if (game.isInsufficientMaterial()) {
-  gameResult = "Draw by insufficient material";
-} else if (isDraw) {
-  gameResult = "Draw";
-}
+ 
 const [pendingPromotion, setPendingPromotion] = useState<{
   from: string;
   to: string;
@@ -300,6 +296,26 @@ function formatTime(seconds: number) {
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }
 
+let checkSquare: string | undefined;
+
+if (game.inCheck()) {
+  const board = game.board();
+
+  for (let row = 0; row < board.length; row++) {
+    for (let col = 0; col < board[row].length; col++) {
+      const piece = board[row][col];
+
+      if (
+        piece &&
+        piece.type === "k" &&
+        piece.color === game.turn()
+      ) {
+        checkSquare = String.fromCharCode(97 + col) + (8 - row);
+      }
+    }
+  }
+}
+
 if (!gameStarted) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
@@ -388,59 +404,106 @@ active:scale-95
 <main className="min-h-screen bg-zinc-950 px-4 py-6">
   <div className="mx-auto max-w-[900px]">
 
-    {/* Status fields */}
-    <div className="mb-4 flex justify-between rounded-lg bg-zinc-900 p-4 text-white">
-      <div>
-        <p className="text-sm text-zinc-400">Turn</p>
-        <p className="font-semibold">
-          {game.turn() === "w" ? "White" : "Black"}
-        </p>
-      </div>
+ {/* Header */}
+<div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/90 p-5 shadow-xl">
 
-      {gameResult && (
-  <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-center text-white">
-    <p className="text-sm font-semibold uppercase tracking-widest text-red-400">
-      Game Over
-    </p>
+  <div className="flex items-center justify-between">
 
-    <p className="mt-1 text-2xl font-bold">
-      {gameResult}
-    </p>
-  </div>
-)}
+    <div>
+      <h1 className="text-3xl font-bold tracking-wide text-white">
+        ♟ Chess Arena
+      </h1>
 
-      <div>
-        <p className="text-sm text-zinc-400">Check</p>
-        <p className="font-semibold">
-          {game.inCheck() ? "✓ Yes" : "No"}
-        </p>
-      </div>
-
-      <div>
-        <p className="text-sm text-zinc-400">Checkmate</p>
-        <p className="font-semibold">
-          {game.isCheckmate() ? "✓ Yes" : "No"}
-        </p>
-      </div>
+      <p className="mt-1 text-sm text-zinc-400">
+        {game.turn() === "w"
+          ? "⚪ White to move"
+          : "⚫ Black to move"}
+      </p>
     </div>
+
+    <div className="flex gap-10 text-center">
+
+      <div>
+        <p className="text-xs uppercase tracking-widest text-zinc-500">
+          Check
+        </p>
+
+        <p
+          className={`mt-1 font-semibold ${
+            game.inCheck()
+              ? "text-red-400"
+              : "text-green-400"
+          }`}
+        >
+          {game.inCheck() ? "YES" : "NO"}
+        </p>
+      </div>
+
+      <div>
+        <p className="text-xs uppercase tracking-widest text-zinc-500">
+          Checkmate
+        </p>
+
+        <p
+          className={`mt-1 font-semibold ${
+            game.isCheckmate()
+              ? "text-red-400"
+              : "text-green-400"
+          }`}
+        >
+          {game.isCheckmate() ? "YES" : "NO"}
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  {gameResult && (
+    <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center">
+
+      <p className="text-xs uppercase tracking-widest text-red-400">
+        Game Over
+      </p>
+
+      <p className="mt-2 text-2xl font-bold text-white">
+        {gameResult}
+      </p>
+
+    </div>
+  )}
+
+</div>
 
     {/* Game area */}
     <div className="flex items-start gap-4">
 
       {/* Chessboard */}
       <div className="w-full max-w-[500px]">
-        <div
-  className={`mb-3 flex items-center justify-between rounded-lg border p-4 transition-all ${
+       <div
+  className={`mb-4 rounded-2xl border p-5 transition-all duration-300 ${
     activePlayer === "b"
-      ? "border-green-500 bg-zinc-800 shadow-lg shadow-green-500/20"
-      : "border-zinc-700 bg-zinc-900"
+      ? "border-emerald-500 bg-zinc-900 shadow-xl shadow-emerald-500/20"
+      : "border-zinc-800 bg-zinc-900"
   }`}
 >
-  <span className="text-lg font-semibold text-white">Black</span>
+  <div className="flex items-center justify-between">
+    <div>
+      <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">
+        ⚫ BLACK
+      </p>
 
-  <span className="font-mono text-3xl font-bold text-white">
-    {formatTime(blackTime)}
-  </span>
+      <p className="mt-3 font-mono text-5xl font-bold text-white">
+        {formatTime(blackTime)}
+      </p>
+    </div>
+
+    {activePlayer === "b" && (
+      <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+        ACTIVE
+      </div>
+    )}
+  </div>
 </div>
 
 
@@ -455,9 +518,14 @@ active:scale-95
     ))
   )}
 </div>
+
+
         <Chessboard
-          options={{
-            position: game.fen(),
+
+options={{
+   boardOrientation: boardOrientation,
+  position: game.fen(),
+     
 
             onSquareClick: ({ square }) => {
               if (!selectedSquare) {
@@ -486,20 +554,29 @@ active:scale-95
                 setSelectedSquare(null);
                 setMoveSquares({});
               }
+              
             },
+            
+            
+           squareStyles: {
+  ...(lastMove && {
+    [lastMove.from]: {
+      background: "rgba(255, 255, 0, 0.35)",
+    },
+    [lastMove.to]: {
+      background: "rgba(255, 255, 0, 0.35)",
+    },
+  }),
 
-            squareStyles: {
-              ...(lastMove && {
-                [lastMove.from]: {
-                  background: "rgba(255, 255, 0, 0.35)",
-                },
-                [lastMove.to]: {
-                  background: "rgba(255, 255, 0, 0.35)",
-                },
-              }),
+  ...(checkSquare && {
+    [checkSquare]: {
+      background: "rgba(255, 0, 0, 0.45)",
+      borderRadius: "50%",
+    },
+  }),
 
-              ...moveSquares,
-            },
+  ...moveSquares,
+},
 
             onPieceDrop: ({ sourceSquare, targetSquare }) => {
               if (!targetSquare) return false;
@@ -509,18 +586,30 @@ active:scale-95
           }}
         />
 
-        <div
-  className={`mt-3 flex items-center justify-between rounded-lg border p-4 transition-all ${
+     <div
+  className={`mt-4 rounded-2xl border p-5 transition-all duration-300 ${
     activePlayer === "w"
-      ? "border-green-500 bg-zinc-800 shadow-lg shadow-green-500/20"
-      : "border-zinc-700 bg-zinc-900"
+      ? "border-emerald-500 bg-zinc-900 shadow-xl shadow-emerald-500/20"
+      : "border-zinc-800 bg-zinc-900"
   }`}
 >
-  <span className="text-lg font-semibold text-white">White</span>
+  <div className="flex items-center justify-between">
+    <div>
+      <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">
+        ⚪ WHITE
+      </p>
 
-  <span className="font-mono text-3xl font-bold text-white">
-    {formatTime(whiteTime)}
-  </span>
+      <p className="mt-3 font-mono text-5xl font-bold text-white">
+        {formatTime(whiteTime)}
+      </p>
+    </div>
+
+    {activePlayer === "w" && (
+      <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+        ACTIVE
+      </div>
+    )}
+  </div>
 </div>
 
         <div className="mt-2 flex min-h-8 items-center gap-1 text-2xl text-white">
@@ -549,6 +638,18 @@ active:scale-95
     >
       Undo
     </button>
+
+    <button
+    onClick={() =>
+      setBoardOrientation((prev) =>
+        prev === "white" ? "black" : "white"
+      )
+    }
+    className="rounded-lg bg-zinc-800 p-3 hover:bg-zinc-700"
+    title="Flip Board"
+  >
+    <RefreshCw size={18} />
+  </button>
 
   <button
     onClick={resetGame}
@@ -596,6 +697,8 @@ active:scale-95
       <h2 className="mb-4 text-center text-lg font-semibold">
         Promote your pawn
       </h2>
+
+    
 
       <div className="flex gap-3">
         {[
