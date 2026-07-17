@@ -66,7 +66,7 @@ const capturedByBlack = verboseHistory
   .filter((move) => move.color === "b" && move.captured)
   .map((move) => move.captured!);
 
-  
+const [showNewGameDialog, setShowNewGameDialog] = useState(false);  
 
 const winner = game.isCheckmate()
   ? game.turn() === "w"
@@ -249,6 +249,47 @@ useEffect(() => {
   }
 }, [winnerByTime]);
 
+useEffect(() => {
+  function handleKeyDown(event: KeyboardEvent) {
+    // Ctrl + Z
+    if (event.ctrlKey && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+
+      if (moveHistory.length > 0) {
+        undoMove();
+      }
+
+      return;
+    }
+
+    // Flip board
+    if (event.key.toLowerCase() === "f") {
+      setBoardOrientation((prev) =>
+        prev === "white" ? "black" : "white"
+      );
+
+      return;
+    }
+
+    // New Game
+    if (event.key.toLowerCase() === "n") {
+      setShowNewGameDialog(true);
+      return;
+    }
+
+    // Escape
+    if (event.key === "Escape") {
+      setShowResultPopup(false);
+      setShowNewGameDialog(false);
+    }
+  }
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () =>
+    window.removeEventListener("keydown", handleKeyDown);
+}, [moveHistory]);
+
 useChessClock({
   activePlayer,
   isClockRunning,
@@ -257,6 +298,8 @@ useChessClock({
   setWinnerByTime,
   setIsClockRunning,
 });
+
+
 
 const checkSquare = getCheckSquare(game);
 
@@ -476,6 +519,8 @@ if (winnerByTime) {
   }}
   onClose={() => setShowResultPopup(false)}
 />
+
+
   
 </main>
   );
