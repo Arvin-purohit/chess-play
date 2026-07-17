@@ -14,7 +14,7 @@ import {
   getMoveOptions,
 } from "@/lib/chessGame";
 import { useChessGame } from "@/hooks/useChessGame";
-
+import NewGameDialog from "@/components/NewGameDialog";
 import BoardSection from "@/components/BoardSection";
 
 export default function Home() {
@@ -488,7 +488,7 @@ if (winnerByTime) {
         prev === "white" ? "black" : "white"
       )
     }
-    onNewGame={resetGame}
+    onNewGame={() => setShowNewGameDialog(true)}
   />
 
 </div>
@@ -518,6 +518,14 @@ if (winnerByTime) {
     resetGame();
   }}
   onClose={() => setShowResultPopup(false)}
+/>
+<NewGameDialog
+  isOpen={showNewGameDialog}
+  onCancel={() => setShowNewGameDialog(false)}
+  onConfirm={() => {
+    setShowNewGameDialog(false);
+    resetGame();
+  }}
 />
 
 
