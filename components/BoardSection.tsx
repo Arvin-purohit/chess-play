@@ -1,0 +1,92 @@
+import TimerCard from "./TimerCard";
+import CapturedPieces from "./CapturedPieces";
+import ChessBoard from "./ChessBoard";
+
+interface BoardSectionProps {
+  blackTime: string;
+  whiteTime: string;
+  activePlayer: "w" | "b";
+
+  capturedByBlack: string[];
+  capturedByWhite: string[];
+
+  position: string;
+  boardOrientation: "white" | "black";
+
+  lastMove: {
+    from: string;
+    to: string;
+  } | null;
+
+  checkSquare?: string;
+
+  moveSquares: Record<string, React.CSSProperties>;
+
+  onSquareClick: (square: string) => void;
+
+  onPieceDrop: (
+    sourceSquare: string,
+    targetSquare: string
+  ) => boolean;
+}
+
+export default function BoardSection({
+  blackTime,
+  whiteTime,
+  activePlayer,
+  capturedByBlack,
+  capturedByWhite,
+  position,
+  boardOrientation,
+  lastMove,
+  checkSquare,
+  moveSquares,
+  onSquareClick,
+  onPieceDrop,
+}: BoardSectionProps) {
+  return (
+    <div className="w-full max-w-[500px]">
+
+      <div className="mb-4">
+        <TimerCard
+          player="Black"
+          time={blackTime}
+          active={activePlayer === "b"}
+        />
+      </div>
+
+      <div className="mb-2">
+        <CapturedPieces
+          title="Black"
+          pieces={capturedByBlack}
+        />
+      </div>
+
+      <ChessBoard
+        position={position}
+        boardOrientation={boardOrientation}
+        lastMove={lastMove}
+        checkSquare={checkSquare}
+        moveSquares={moveSquares}
+        onSquareClick={onSquareClick}
+        onPieceDrop={onPieceDrop}
+      />
+
+      <div className="mt-4">
+        <TimerCard
+          player="White"
+          time={whiteTime}
+          active={activePlayer === "w"}
+        />
+      </div>
+
+      <div className="mt-2">
+        <CapturedPieces
+          title="White"
+          pieces={capturedByWhite}
+        />
+      </div>
+
+    </div>
+  );
+}
