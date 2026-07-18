@@ -16,6 +16,7 @@ import {
 import { useChessGame } from "@/hooks/useChessGame";
 import NewGameDialog from "@/components/NewGameDialog";
 import BoardSection from "@/components/BoardSection";
+import HomeScreen from "@/components/HomeScreen";
 
 export default function Home() {
 const {
@@ -54,6 +55,7 @@ const [showResultPopup, setShowResultPopup] = useState(false);
 const [winnerByTime, setWinnerByTime] =
   useState<"w" | "b" | null>(null);
 
+
 const moveHistory = game.history();
 
 const verboseHistory = game.history({ verbose: true });
@@ -75,6 +77,14 @@ const winner = game.isCheckmate()
   : null;
 
   const isDraw = game.isDraw();
+// Mode selection state
+  const [screen, setScreen] = useState<
+  "home" | "humanSetup" | "computerSetup" | "game"
+>("home");
+
+const [gameMode, setGameMode] = useState<
+  "human" | "computer"
+>("human");
   
 
 let gameResult: string | null = null;
@@ -302,6 +312,21 @@ useChessClock({
 
 
 const checkSquare = getCheckSquare(game);
+
+if (screen === "home") {
+  return (
+    <HomeScreen
+      onHumanMode={() => {
+        setGameMode("human");
+        setScreen("humanSetup");
+      }}
+      onComputerMode={() => {
+        setGameMode("computer");
+        setScreen("computerSetup");
+      }}
+    />
+  );
+}
 
 if (!gameStarted) {
   return (
