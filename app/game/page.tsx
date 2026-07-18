@@ -92,6 +92,7 @@ const [showNewGameDialog, setShowNewGameDialog] =
     setIsClockRunning,
   });
   const moveHistory = useMemo(() => game.history(), [game]);
+  const moveNumber = Math.ceil(moveHistory.length / 2);
 
 const verboseHistory = useMemo(
   () => game.history({ verbose: true }),
@@ -351,6 +352,11 @@ function makeMove(
         isCheckmate={game.isCheckmate()}
         gameResult={gameResult}
       />
+      <div className="mt-4 mb-6 flex justify-center">
+  <div className="rounded-full bg-zinc-800 px-5 py-2 text-sm font-semibold text-zinc-200">
+    Move {moveNumber}
+  </div>
+</div>
 
       <div className="flex items-start justify-center gap-8">
 
