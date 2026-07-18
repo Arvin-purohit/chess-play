@@ -26,6 +26,30 @@ export default function GameSidebar({
       />
 
       <MoveHistory moves={moveHistory} />
+      <div className="mt-8 rounded-xl border border-zinc-700 p-4">
+  <h3 className="mb-3 text-sm font-bold text-white">
+    ⌨ Shortcuts
+  </h3>
+
+  <div className="space-y-2 text-sm text-zinc-300">
+    <div className="flex justify-between">
+      <span>Undo</span>
+      <kbd>Ctrl + Z</kbd>
     </div>
+
+    <div className="flex justify-between">
+      <span>Flip Board</span>
+      <kbd>F</kbd>
+    </div>
+
+    <div className="flex justify-between">
+      <span>Close Dialog</span>
+      <kbd>Esc</kbd>
+    </div>
+  </div>
+</div>
+    </div>
+
+    
   );
 }
