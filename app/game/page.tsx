@@ -406,7 +406,10 @@ function makeMove(
 
         <GameSidebar
           moveHistory={moveHistory}
-          canUndo={moveHistory.length > 0}
+         canUndo={
+  moveHistory.length > 0 &&
+  !game.isGameOver()
+}
           onUndo={undoMove}
           onFlip={() =>
             setBoardOrientation((prev) =>
@@ -471,6 +474,29 @@ function makeMove(
     }
   }}
 />
+
+<footer className="mt-8 border-t border-zinc-800 pt-4">
+  <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-zinc-400">
+    <span className="font-semibold text-zinc-300">
+      ⌨ Shortcuts
+    </span>
+
+    <span>
+      <kbd className="rounded bg-zinc-800 px-2 py-1">Ctrl + Z</kbd>
+      <span className="ml-2">Undo</span>
+    </span>
+
+    <span>
+      <kbd className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs font-semibold text-white shadow-sm">F</kbd>
+      <span className="ml-2">Flip Board</span>
+    </span>
+
+    <span>
+      <kbd className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs font-semibold text-white shadow-sm">Esc</kbd>
+      <span className="ml-2">Close Dialog</span>
+    </span>
+  </div>
+</footer>
     
   </main>
 );
