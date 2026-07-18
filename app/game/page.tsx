@@ -334,7 +334,17 @@ function makeMove(
 >
   ← Back to Home
 </button>
+<div className="mb-4 flex items-center justify-between">
+  <div className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white">
+    {mode === "human" ? "👥 Human vs Human" : "🤖 Human vs Computer"}
+  </div>
 
+  {mode === "computer" && (
+    <div className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">
+      🤖 Level {difficulty}
+    </div>
+  )}
+</div>
       <GameHeader
         turn={game.turn()}
         inCheck={game.inCheck()}
