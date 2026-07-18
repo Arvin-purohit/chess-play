@@ -51,5 +51,8 @@ export function useChessClock({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activePlayer, isClockRunning]);
+  }, [activePlayer, isClockRunning , setWhiteTime,
+  setBlackTime,
+  setWinnerByTime,
+  setIsClockRunning,]);
 }
