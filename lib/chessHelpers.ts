@@ -21,3 +21,30 @@ export function getCheckSquare(game: Chess) {
 
   return undefined;
 }
+const PIECE_VALUES = {
+  p: 1,
+  n: 3,
+  b: 3,
+  r: 5,
+  q: 9,
+} as const;
+
+export function getMaterialDifference(
+  capturedByWhite: string[],
+  capturedByBlack: string[],
+) {
+  const whiteMaterial = capturedByWhite.reduce(
+    (sum, piece) => sum + (PIECE_VALUES[piece as keyof typeof PIECE_VALUES] ?? 0),
+    0
+  );
+
+  const blackMaterial = capturedByBlack.reduce(
+    (sum, piece) => sum + (PIECE_VALUES[piece as keyof typeof PIECE_VALUES] ?? 0),
+    0
+  );
+
+  return {
+    whiteAdvantage: Math.max(0, whiteMaterial - blackMaterial),
+    blackAdvantage: Math.max(0, blackMaterial - whiteMaterial),
+  };
+}

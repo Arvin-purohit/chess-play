@@ -11,9 +11,11 @@ import NewGameDialog from "@/components/NewGameDialog";
 import { useChessGame } from "@/hooks/useChessGame";
 import { useChessClock } from "@/hooks/useChessClock";
 import { formatTime } from "@/lib/time";
-import { getCheckSquare } from "@/lib/chessHelpers";
 import { makeChessMove, getMoveOptions } from "@/lib/chessGame";
-
+import {
+  getCheckSquare,
+  getMaterialDifference,
+} from "@/lib/chessHelpers";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import LeaveGameDialog from "@/components/LeaveGameDialog";

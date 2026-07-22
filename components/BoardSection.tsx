@@ -1,6 +1,7 @@
 import TimerCard from "./TimerCard";
 import CapturedPieces from "./CapturedPieces";
 import ChessBoard from "./ChessBoard";
+import { getMaterialDifference } from "@/lib/chessHelpers";
 
 interface BoardSectionProps {
   blackTime: string;
@@ -46,6 +47,11 @@ export default function BoardSection({
   onPieceDrop,
   isAiThinking
 }: BoardSectionProps) {
+  const { whiteAdvantage, blackAdvantage } =
+  getMaterialDifference(
+    capturedByWhite,
+    capturedByBlack
+  );
   return (
   <div className="flex items-start gap-4">
 
@@ -72,9 +78,10 @@ export default function BoardSection({
 
       <div className="mb-2">
         <CapturedPieces
-          title="Black"
-          pieces={capturedByBlack}
-        />
+        title="Black"
+  pieces={capturedByBlack}
+  advantage={blackAdvantage}
+/>
 
         
       </div>
@@ -93,9 +100,10 @@ export default function BoardSection({
 
       <div className="mt-2">
         <CapturedPieces
-          title="White"
-          pieces={capturedByWhite}
-        />
+  title="White"
+  pieces={capturedByWhite}
+  advantage={whiteAdvantage}
+/>
       </div>
 
     </div>
