@@ -6,6 +6,9 @@ function getSounds() {
       move: new Audio("/sounds/move.mp3"),
       capture: new Audio("/sounds/capture.mp3"),
       check: new Audio("/sounds/check.mp3"),
+      win: new Audio("/sounds/win.mp3"),
+lose: new Audio("/sounds/lose.mp3"),
+draw: new Audio("/sounds/draw.mp3"),
     };
 
     Object.values(sounds).forEach((sound) => {
@@ -18,7 +21,9 @@ function getSounds() {
 }
 
 export function playSound(
-  type: "move" | "capture" | "check"
+  type: "move" | "capture" | "check" | "win"
+  | "lose"
+  | "draw"
 ) {
   if (typeof window === "undefined") return;
 

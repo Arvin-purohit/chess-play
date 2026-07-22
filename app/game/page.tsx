@@ -182,17 +182,42 @@ if (winnerByTime) {
 
 
 useEffect(() => {
-  if (game.isGameOver()) {
-    setIsClockRunning(false);
-    setShowResultPopup(true);
+  if (!game.isGameOver()) return;
+
+  setIsClockRunning(false);
+  setShowResultPopup(true);
+
+  if (game.isCheckmate()) {
+    if (mode === "computer") {
+      const humanWon =
+        (color === "white" && winner === "White") ||
+        (color === "black" && winner === "Black");
+
+      playSound(humanWon ? "win" : "lose");
+    } else {
+      playSound("win");
+    }
+  } else {
+    playSound("draw");
   }
 }, [game]);
-
+ 
 useEffect(() => {
-  if (winnerByTime) {
-    setShowResultPopup(true);
+  if (!winnerByTime) return;
+
+  setShowResultPopup(true);
+
+  if (mode === "computer") {
+    const humanWon =
+      (color === "white" && winnerByTime === "w") ||
+      (color === "black" && winnerByTime === "b");
+
+    playSound(humanWon ? "win" : "lose");
+  } else {
+    playSound("win");
   }
 }, [winnerByTime]);
+ 
 
 useEffect(() => {
   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
