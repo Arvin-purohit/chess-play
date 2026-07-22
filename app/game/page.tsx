@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import GameHeader from "@/components/GameHeader";
 import BoardSection from "@/components/BoardSection";
@@ -22,6 +22,8 @@ import { playComputerMove } from "@/hooks/useComputerPlayer";
 import { AI_DIFFICULTY } from "@/lib/aiDifficulty";
 
 import { playSound } from "@/lib/soundManager";
+
+import { getGameResult } from "@/lib/gameResult";
 export default function GamePage() {
 
   
@@ -123,7 +125,7 @@ const winner = game.isCheckmate()
 const isDraw = game.isDraw();
 
 const [isAiThinking, setIsAiThinking] = useState(false);
-
+const aiMoveTimeout = useRef<NodeJS.Timeout | null>(null);
 let gameResult: string | null = null;
 
 if (winnerByTime) {
@@ -197,6 +199,8 @@ useEffect(() => {
     event.preventDefault();
     event.returnValue = "";
   };
+  
+  
 
   window.addEventListener("beforeunload", handleBeforeUnload);
 
@@ -204,7 +208,50 @@ useEffect(() => {
     window.removeEventListener("beforeunload", handleBeforeUnload);
   };
 }, []);
+useEffect(() => {
+  return () => {
+    if (aiMoveTimeout.current) {
+      clearTimeout(aiMoveTimeout.current);
+    }
+  };
+}, []);
 
+useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    // Ctrl + Z -> Undo
+    if (event.ctrlKey && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+
+      if (moveHistory.length > 0 && !game.isGameOver()) {
+        undoMove();
+      }
+    }
+
+    // F -> Flip board
+    if (event.key.toLowerCase() === "f") {
+      setBoardOrientation((prev) =>
+        prev === "white" ? "black" : "white"
+      );
+    }
+
+    // Escape -> Close dialogs
+    if (event.key === "Escape") {
+      setShowLeaveDialog(false);
+      setShowNewGameDialog(false);
+      setShowResultPopup(false);
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, [
+  moveHistory.length,
+  game,
+  undoMove,
+]);
 
 
 function resetGame() {
@@ -223,16 +270,29 @@ function resetGame() {
   setActivePlayer("w");
   setWinnerByTime(null);
   setIsClockRunning(true);
-
-
+if (aiMoveTimeout.current) {
+    clearTimeout(aiMoveTimeout.current);
+    aiMoveTimeout.current = null;
 }
 
+}
 function undoMove() {
   const history = game.history({ verbose: true });
-
+if (aiMoveTimeout.current) {
+    clearTimeout(aiMoveTimeout.current);
+    aiMoveTimeout.current = null;
+}
   if (history.length === 0) return;
 
-  const remainingMoves = history.slice(0, -1);
+  let movesToRemove = 1;
+
+  if (mode === "computer") {
+    if (history.length < 2) return;
+
+    movesToRemove = 2;
+  }
+
+  const remainingMoves = history.slice(0, -movesToRemove);
 
   const newGame = new Chess();
 
@@ -261,7 +321,18 @@ function undoMove() {
   setSelectedSquare(null);
   setMoveSquares({});
   setPendingPromotion(null);
+
+  setActivePlayer(newGame.turn());
+
+  setIsAiThinking(false);
+
+  if (!newGame.isGameOver()) {
+    setShowResultPopup(false);
+  }
+
+  setWinnerByTime(null);
 }
+
 function showMoveOptions(square: string) {
   const squares = getMoveOptions(game, square);
 
@@ -269,6 +340,7 @@ function showMoveOptions(square: string) {
 
   return Object.keys(squares).length > 0;
 }
+
 
  function makeMove(
 
@@ -332,7 +404,7 @@ setIsAiThinking(true);
 
   const settings = AI_DIFFICULTY[difficulty];
 
-setTimeout(() => {
+aiMoveTimeout.current = setTimeout(() => {
   void playComputerMove({
     engine: stockfish,
     difficulty,
@@ -345,6 +417,8 @@ setTimeout(() => {
 }, settings.thinkingTime);
   
 }
+
+
 
    
 
@@ -365,6 +439,7 @@ console.log("👤 Human lastMove");
     return false;
   }
 }
+
 
   
   return (
@@ -440,9 +515,10 @@ console.log("👤 Human lastMove");
 
         <GameSidebar
           moveHistory={moveHistory}
-         canUndo={
+        canUndo={
   moveHistory.length > 0 &&
-  !game.isGameOver()
+  !game.isGameOver() &&
+  !isAiThinking
 }
           onUndo={undoMove}
           onFlip={() =>
