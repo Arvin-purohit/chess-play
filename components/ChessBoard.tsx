@@ -14,6 +14,8 @@ interface ChessBoardProps {
   ) => boolean;
 }
 
+
+
 export default function ChessBoard({
   position,
   boardOrientation,
@@ -23,8 +25,10 @@ export default function ChessBoard({
   onSquareClick,
   onPieceDrop,
 }: ChessBoardProps) {
+  
   return (
     <Chessboard
+   
       options={{
         boardOrientation,
         position,
@@ -53,6 +57,7 @@ export default function ChessBoard({
           ...moveSquares,
         },
 
+        
         onPieceDrop: ({ sourceSquare, targetSquare }) => {
           if (!targetSquare) return false;
           return onPieceDrop(sourceSquare, targetSquare);

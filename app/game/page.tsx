@@ -17,23 +17,16 @@ import { makeChessMove, getMoveOptions } from "@/lib/chessGame";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import LeaveGameDialog from "@/components/LeaveGameDialog";
-
+import { useStockfish } from "@/hooks/useStockfish";
+import { playComputerMove } from "@/hooks/useComputerPlayer";
 
 export default function GamePage() {
 
-    function formatTime(seconds: number) {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
+  
    const router = useRouter();
   const searchParams = useSearchParams();
 
-  const mode = searchParams.get("mode") as
-    | "human"
-    | "computer"
-    | null;
+  const mode = searchParams.get("mode") ?? "human";
 
   const time = Number(searchParams.get("time") ?? 10);
 
@@ -50,6 +43,8 @@ const [pendingNavigation, setPendingNavigation] =
   const difficulty = Number(
     searchParams.get("difficulty") ?? 5
   );
+
+const stockfish = useStockfish();
 
   const {
     game,
@@ -206,6 +201,8 @@ useEffect(() => {
   };
 }, []);
 
+
+
 function resetGame() {
   const newGame = new Chess();
 
@@ -223,8 +220,7 @@ function resetGame() {
   setWinnerByTime(null);
   setIsClockRunning(true);
 
-setPendingNavigation(() => () => router.push("/"));
-setShowLeaveDialog(true);
+
 }
 
 function undoMove() {
@@ -270,7 +266,9 @@ function showMoveOptions(square: string) {
   return Object.keys(squares).length > 0;
 }
 
-function makeMove(
+ function makeMove(
+
+    
   sourceSquare: string,
   targetSquare: string,
   promotion?: "q" | "r" | "b" | "n",
@@ -281,6 +279,10 @@ function makeMove(
     piece?.type === "p" &&
     ((piece.color === "w" && targetSquare.endsWith("8")) ||
       (piece.color === "b" && targetSquare.endsWith("1")));
+
+      if (game.isGameOver() || winnerByTime) {
+  return false;
+}
 
   if (isPromotion && !promotion) {
     setPendingPromotion({
@@ -302,11 +304,30 @@ function makeMove(
     if (!gameCopy) {
       return false;
     }
-
+console.log("👤 Human setGame");
     setGame(gameCopy);
 
-    setActivePlayer(gameCopy.turn());
+    if (
+  mode === "computer" &&
+  !gameCopy.isGameOver()
+) {
+ setTimeout(() => {
+  void playComputerMove({
+    engine: stockfish,
+    difficulty,
+    game: gameCopy,
+    setGame,
+    setLastMove,
+    setActivePlayer,
+  });
+}, 700); // 700ms delay
+  
+}
 
+   
+
+    setActivePlayer(gameCopy.turn());
+console.log("👤 Human lastMove");
     setLastMove({
       from: sourceSquare,
       to: targetSquare,
@@ -316,50 +337,35 @@ function makeMove(
     setMoveSquares({});
     setPendingPromotion(null);
 
+
     return true;
   } catch {
     return false;
   }
 }
+
   
   return (
-  <main className="min-h-screen bg-zinc-950 px-4 py-6">
-    <div className="mx-auto max-w-7xl">
+  <main className="min-h-screen bg-zinc-950 px-4 py-3">
+   <div className="mx-auto flex h-[calc(100vh-24px)] max-w-7xl flex-col">
 
-<button
-  onClick={() => {
+
+
+     <GameHeader
+  turn={game.turn()}
+  inCheck={game.inCheck()}
+  isCheckmate={game.isCheckmate()}
+  gameResult={gameResult}
+  mode={mode}
+  moveNumber={moveNumber}
+  onBack={() => {
     setPendingNavigation(() => () => router.push("/"));
     setShowLeaveDialog(true);
   }}
-  className="mb-4 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700"
->
-  ← Back to Home
-</button>
-<div className="mb-4 flex items-center justify-between">
-  <div className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white">
-    {mode === "human" ? "👥 Human vs Human" : "🤖 Human vs Computer"}
-  </div>
+/>
+     
 
-  {mode === "computer" && (
-    <div className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">
-      🤖 Level {difficulty}
-    </div>
-  )}
-</div>
-      <GameHeader
-        turn={game.turn()}
-        inCheck={game.inCheck()}
-        isCheckmate={game.isCheckmate()}
-        gameResult={gameResult}
-      />
-      <div className="mt-4 mb-6 flex justify-center">
-  <div className="rounded-full bg-zinc-800 px-5 py-2 text-sm font-semibold text-zinc-200">
-    Move {moveNumber}
-  </div>
-</div>
-
-      <div className="flex items-start justify-center gap-8">
-
+<div className="flex flex-1 items-start justify-center gap-6">
         <BoardSection
           blackTime={formatTime(blackTime)}
           whiteTime={formatTime(whiteTime)}
@@ -372,6 +378,7 @@ function makeMove(
           checkSquare={checkSquare}
           moveSquares={moveSquares}
           onSquareClick={(square) => {
+            if (game.isGameOver() || winnerByTime) return;
             if (!selectedSquare) {
               const hasMoves = showMoveOptions(square);
 
@@ -399,9 +406,13 @@ function makeMove(
               setMoveSquares({});
             }
           }}
-          onPieceDrop={(sourceSquare, targetSquare) =>
-            makeMove(sourceSquare, targetSquare)
-          }
+          onPieceDrop={(sourceSquare, targetSquare) => {
+  if (game.isGameOver() || winnerByTime) {
+    return false;
+  }
+
+  return makeMove(sourceSquare, targetSquare);
+}}
         />
 
         <GameSidebar
@@ -444,6 +455,7 @@ function makeMove(
       emoji={popupEmoji}
       onNewGame={() => {
         setShowResultPopup(false);
+        setShowNewGameDialog(false);
         resetGame();
       }}
       onClose={() => setShowResultPopup(false)}
@@ -453,6 +465,8 @@ function makeMove(
       isOpen={showNewGameDialog}
       onCancel={() =>
         setShowNewGameDialog(false)
+       
+
       }
       onConfirm={() => {
         setShowNewGameDialog(false);
@@ -475,7 +489,7 @@ function makeMove(
   }}
 />
 
-<footer className="mt-8 border-t border-zinc-800 pt-4">
+<footer className="mt-3 border-t border-zinc-800 pt-2">
   <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-zinc-400">
     <span className="font-semibold text-zinc-300">
       ⌨ Shortcuts

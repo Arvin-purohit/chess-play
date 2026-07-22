@@ -45,15 +45,27 @@ export default function BoardSection({
   onPieceDrop,
 }: BoardSectionProps) {
   return (
-    <div className="w-full max-w-[500px]">
+  <div className="flex items-start gap-4">
 
-      <div className="mb-4">
-        <TimerCard
-          player="Black"
-          time={blackTime}
-          active={activePlayer === "b"}
-        />
-      </div>
+    {/* Left Side - Timers */}
+    <div className="flex w-36 flex-col justify-between self-stretch">
+
+      <TimerCard
+        player="Black"
+        time={blackTime}
+        active={activePlayer === "b"}
+      />
+
+      <TimerCard
+        player="White"
+        time={whiteTime}
+        active={activePlayer === "w"}
+      />
+
+    </div>
+
+    {/* Board */}
+    <div className="w-full max-w-[500px]">
 
       <div className="mb-2">
         <CapturedPieces
@@ -72,14 +84,6 @@ export default function BoardSection({
         onPieceDrop={onPieceDrop}
       />
 
-      <div className="mt-4">
-        <TimerCard
-          player="White"
-          time={whiteTime}
-          active={activePlayer === "w"}
-        />
-      </div>
-
       <div className="mt-2">
         <CapturedPieces
           title="White"
@@ -88,5 +92,6 @@ export default function BoardSection({
       </div>
 
     </div>
-  );
-}
+
+  </div>
+)}
