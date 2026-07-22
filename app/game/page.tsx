@@ -19,6 +19,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import LeaveGameDialog from "@/components/LeaveGameDialog";
 import { useStockfish } from "@/hooks/useStockfish";
 import { playComputerMove } from "@/hooks/useComputerPlayer";
+import { AI_DIFFICULTY } from "@/lib/aiDifficulty";
 
 export default function GamePage() {
 
@@ -311,7 +312,10 @@ console.log("👤 Human setGame");
   mode === "computer" &&
   !gameCopy.isGameOver()
 ) {
- setTimeout(() => {
+
+  const settings = AI_DIFFICULTY[difficulty];
+
+setTimeout(() => {
   void playComputerMove({
     engine: stockfish,
     difficulty,
@@ -320,7 +324,7 @@ console.log("👤 Human setGame");
     setLastMove,
     setActivePlayer,
   });
-}, 700); // 700ms delay
+}, settings.thinkingTime);
   
 }
 

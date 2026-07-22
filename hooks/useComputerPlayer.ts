@@ -1,6 +1,7 @@
 import { Chess } from "chess.js";
 import { MutableRefObject } from "react";
 import { StockfishEngine } from "@/lib/StockfishEngine";
+import { AI_DIFFICULTY } from "@/lib/aiDifficulty";
 
 interface PlayComputerMoveProps {
   engine: MutableRefObject<StockfishEngine | null>;
@@ -30,10 +31,12 @@ export async function playComputerMove({
 
   engine.current.setSkill(difficulty);
 
-  const bestMove = await engine.current.getBestMove(
-    game.fen(),
-    12
-  );
+const settings = AI_DIFFICULTY[difficulty];
+
+const bestMove = await engine.current.getBestMove(
+  game.fen(),
+  settings.depth
+);
 
   console.log("🎯 Best move:", bestMove);
 
