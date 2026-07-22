@@ -29,7 +29,10 @@ export function makeChessMove({
     return null;
   }
 
-  return gameCopy;
+  return {
+  game: gameCopy,
+  move,
+};
 }
 
 export function getMoveOptions(

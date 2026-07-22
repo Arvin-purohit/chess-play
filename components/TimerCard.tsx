@@ -28,11 +28,7 @@ export default function TimerCard({
           </p>
         </div>
 
-        {active && (
-          <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-400">
-            ACTIVE
-          </div>
-        )}
+        
       </div>
     </div>
   );

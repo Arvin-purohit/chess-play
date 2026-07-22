@@ -21,6 +21,7 @@ import { useStockfish } from "@/hooks/useStockfish";
 import { playComputerMove } from "@/hooks/useComputerPlayer";
 import { AI_DIFFICULTY } from "@/lib/aiDifficulty";
 
+import { playSound } from "@/lib/soundManager";
 export default function GamePage() {
 
   
@@ -120,6 +121,8 @@ const winner = game.isCheckmate()
   : null;
 
 const isDraw = game.isDraw();
+
+const [isAiThinking, setIsAiThinking] = useState(false);
 
 let gameResult: string | null = null;
 
@@ -274,6 +277,9 @@ function showMoveOptions(square: string) {
   targetSquare: string,
   promotion?: "q" | "r" | "b" | "n",
 ) {
+  if (isAiThinking) {
+  return false;
+}
   const piece = game.get(sourceSquare as any);
 
   const isPromotion =
@@ -295,23 +301,34 @@ function showMoveOptions(square: string) {
   }
 
   try {
-    const gameCopy = makeChessMove({
+    const result = makeChessMove({
       game,
       sourceSquare,
       targetSquare,
       promotion,
     });
 
-    if (!gameCopy) {
+    if (!result) {
       return false;
     }
-console.log("👤 Human setGame");
+const { game: gameCopy, move } = result;
+if (move.captured) {
+  playSound("capture");
+} else {
+  playSound("move");
+}
+
+if (gameCopy.inCheck()) {
+  playSound("check");
+}
     setGame(gameCopy);
 
     if (
   mode === "computer" &&
   !gameCopy.isGameOver()
 ) {
+
+setIsAiThinking(true);
 
   const settings = AI_DIFFICULTY[difficulty];
 
@@ -323,6 +340,7 @@ setTimeout(() => {
     setGame,
     setLastMove,
     setActivePlayer,
+    setIsAiThinking,
   });
 }, settings.thinkingTime);
   
@@ -371,6 +389,7 @@ console.log("👤 Human lastMove");
 
 <div className="flex flex-1 items-start justify-center gap-6">
         <BoardSection
+        isAiThinking={isAiThinking}
           blackTime={formatTime(blackTime)}
           whiteTime={formatTime(whiteTime)}
           activePlayer={activePlayer}

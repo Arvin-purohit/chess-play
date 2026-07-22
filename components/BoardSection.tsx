@@ -12,6 +12,7 @@ interface BoardSectionProps {
 
   position: string;
   boardOrientation: "white" | "black";
+  isAiThinking: boolean;
 
   lastMove: {
     from: string;
@@ -43,6 +44,7 @@ export default function BoardSection({
   moveSquares,
   onSquareClick,
   onPieceDrop,
+  isAiThinking
 }: BoardSectionProps) {
   return (
   <div className="flex items-start gap-4">
@@ -61,6 +63,7 @@ export default function BoardSection({
         time={whiteTime}
         active={activePlayer === "w"}
       />
+     
 
     </div>
 
@@ -72,7 +75,11 @@ export default function BoardSection({
           title="Black"
           pieces={capturedByBlack}
         />
+
+        
       </div>
+
+      
 
       <ChessBoard
         position={position}
