@@ -40,7 +40,7 @@ A modern chess game built with **Next.js**, **TypeScript**, **Tailwind CSS**, **
 Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/chess-play.git
+git clone https://github.com/Arvin-purohit/chess-play.git
 ```
 
 Go into the project
@@ -113,4 +113,4 @@ types/
 
 ## 👨‍💻 Author
 
-Built with ❤️ by **Nakul**
+Built with ❤️ by **Arvin**
