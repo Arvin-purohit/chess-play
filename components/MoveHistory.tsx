@@ -47,9 +47,9 @@ const emptyRows = Array.from({
       key={`empty-${index}`}
       className="grid grid-cols-[45px_1fr_1fr] items-center rounded-lg bg-zinc-900 px-2 py-1.5"
     >
-      <span />
-      <span />
-      <span />
+      <span className="text-zinc-700">-</span>
+<span className="text-center text-zinc-700">-</span>
+<span className="text-center text-zinc-700">-</span>
     </div>
   ))}
 
