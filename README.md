@@ -72,18 +72,19 @@ http://localhost:3000
 <h2 align="center">📸 Screenshots</h2>
 
 <p align="center">
-  <img src="/screenshots/home.png" width="900" alt="Home Screen">
-</p>
-<p align="center">
-  <img src="/screenshots/human-setup.png" width="900" alt="Home Screen">
+  <img src="/screenshots/home.png" width="900">
 </p>
 
 <p align="center">
-  <img src="/screenshots/gameplay.png" width="900" alt="Gameplay">
+  <img src="/screenshots/gameplay.png" width="900">
 </p>
 
 <p align="center">
-  <img src="/screenshots/computer-setup.png" width="900" alt="Computer Setup">
+  <img src="/screenshots/computer-setup.png" width="900">
+</p>
+
+<p align="center">
+  <img src="/screenshots/human-setup.png" width="900">
 </p>
 
 ## 📂 Project Structure
