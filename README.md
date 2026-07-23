@@ -72,21 +72,20 @@ http://localhost:3000
 <h2 align="center">📸 Screenshots</h2>
 
 <p align="center">
-  <img src="/screenshots/home.png" width="900">
+  <img src="https://raw.githubusercontent.com/Arvin-purohit/chess-play/main/public/screenshots/home.png" width="900" alt="Home Screen">
 </p>
 
 <p align="center">
-  <img src="/screenshots/gameplay.png" width="900">
+  <img src="https://raw.githubusercontent.com/Arvin-purohit/chess-play/main/public/screenshots/gameplay.png" width="900" alt="Gameplay">
 </p>
 
 <p align="center">
-  <img src="/screenshots/computer-setup.png" width="900">
+  <img src="https://raw.githubusercontent.com/Arvin-purohit/chess-play/main/public/screenshots/computer-setup.png" width="900" alt="Computer Setup">
 </p>
 
 <p align="center">
-  <img src="/screenshots/human-setup.png" width="900">
+  <img src="https://raw.githubusercontent.com/Arvin-purohit/chess-play/main/public/screenshots/human-setup.png" width="900" alt="Human Setup">
 </p>
-
 ## 📂 Project Structure
 
 ```
