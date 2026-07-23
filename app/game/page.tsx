@@ -16,7 +16,6 @@ import {
   getCheckSquare,
 } from "@/lib/chessHelpers";
 import { useSearchParams, useRouter } from "next/navigation";
-
 import LeaveGameDialog from "@/components/LeaveGameDialog";
 import { useStockfish } from "@/hooks/useStockfish";
 import { playComputerMove } from "@/hooks/useComputerPlayer";
@@ -29,6 +28,7 @@ function GamePageContent() {
 
   
    const router = useRouter();
+  
   const searchParams = useSearchParams();
   
 
@@ -36,11 +36,9 @@ function GamePageContent() {
 
   const time = Number(searchParams.get("time") ?? 10);
 
-  const [showLeaveDialog, setShowLeaveDialog] =
-  useState(false);
+  
 
-const [pendingNavigation, setPendingNavigation] =
-  useState<(() => void) | null>(null);
+
 
   const color = (searchParams.get("color") ?? "white") as
     | "white"
@@ -79,6 +77,10 @@ const stockfish = useStockfish();
     color === "black" ? "black" : "white"
   );
 
+  const [pendingNavigation, setPendingNavigation] =
+  useState<(() => void) | null>(null)
+
+const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 const [showResultPopup, setShowResultPopup] =
   useState(false);
 
@@ -182,24 +184,6 @@ if (winnerByTime) {
   popupEmoji = "🤝";
 }
 
-useEffect(() => {
-  // Create a fake history entry
-  window.history.pushState(null, "", window.location.href);
-
-  const handlePopState = () => {
-    // Show our dialog
-    setShowLeaveDialog(true);
-
-    // Stay on the current page
-    window.history.pushState(null, "", window.location.href);
-  };
-
-  window.addEventListener("popstate", handlePopState);
-
-  return () => {
-    window.removeEventListener("popstate", handlePopState);
-  };
-}, []);
 
 
 useEffect(() => {
@@ -617,14 +601,17 @@ aiMoveTimeout.current = setTimeout(() => {
       }}
     />
      
-    <LeaveGameDialog
+   <LeaveGameDialog
   isOpen={showLeaveDialog}
   onStay={() => setShowLeaveDialog(false)}
   onLeave={() => {
-    setShowLeaveDialog(false);
+  setShowLeaveDialog(false);
 
-router.back();
-  }}
+  if (pendingNavigation) {
+    pendingNavigation();
+    setPendingNavigation(null);
+  }
+}}
 />
 <footer className="mt-3 border-t border-zinc-800 pt-2">
   <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-zinc-400">
