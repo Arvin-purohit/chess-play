@@ -1,5 +1,4 @@
-import { Chess } from "chess.js";
-
+import { Chess, Square } from "chess.js";
 interface MakeMoveParams {
   game: Chess;
   sourceSquare: string;
@@ -39,28 +38,24 @@ export function getMoveOptions(
   game: Chess,
   square: string
 ) {
-  const moves = game.moves({
-    square: square as any,
-    verbose: true,
-  });
+ const moves = game.moves({
+  square: square as Square,
+  verbose: true,
+});
 
-  if (moves.length === 0) {
-    return {};
-  }
+const moveSquares: Record<string, React.CSSProperties> = {};
 
-  const moveSquares: Record<string, React.CSSProperties> = {};
-
-  moves.forEach((move) => {
-    moveSquares[move.to] = {
-      background:
-        game.get(move.to as any) &&
-        game.get(move.to as any)?.color !==
-          game.get(square as any)?.color
-          ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
-          : "radial-gradient(circle, rgba(0,0,0,.2) 25%, transparent 25%)",
-      borderRadius: "50%",
-    };
-  });
+moves.forEach((move) => {
+  moveSquares[move.to] = {
+    background:
+      game.get(move.to as Square) &&
+      game.get(move.to as Square)?.color !==
+        game.get(square as Square)?.color
+        ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
+        : "radial-gradient(circle, rgba(0,0,0,.2) 25%, transparent 25%)",
+    borderRadius: "50%",
+  };
+});
 
   return moveSquares;
 }

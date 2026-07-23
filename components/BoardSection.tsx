@@ -45,7 +45,7 @@ export default function BoardSection({
   moveSquares,
   onSquareClick,
   onPieceDrop,
-  isAiThinking
+  
 }: BoardSectionProps) {
   const { whiteAdvantage, blackAdvantage } =
   getMaterialDifference(
@@ -72,8 +72,7 @@ export default function BoardSection({
     </div>
 
     {/* Board */}
-<div className="mx-auto w-full max-w-[500px] lg:mx-0">
-      <div className="mb-2">
+<div className="mx-auto w-full min-w-0 max-w-[500px] lg:mx-0">      <div className="mb-2">
         <CapturedPieces
         title="Black"
   pieces={capturedByBlack}

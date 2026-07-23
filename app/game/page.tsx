@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Chess } from "chess.js";
+import { Suspense , useEffect, useMemo, useRef, useState } from "react";
+import { Chess ,Square} from "chess.js";
 import GameHeader from "@/components/GameHeader";
 import BoardSection from "@/components/BoardSection";
 import GameSidebar from "@/components/GameSideBar";
@@ -14,7 +14,6 @@ import { formatTime } from "@/lib/time";
 import { makeChessMove, getMoveOptions } from "@/lib/chessGame";
 import {
   getCheckSquare,
-  getMaterialDifference,
 } from "@/lib/chessHelpers";
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -25,12 +24,13 @@ import { AI_DIFFICULTY } from "@/lib/aiDifficulty";
 
 import { playSound } from "@/lib/soundManager";
 
-import { getGameResult } from "@/lib/gameResult";
-export default function GamePage() {
+
+function GamePageContent() {
 
   
    const router = useRouter();
   const searchParams = useSearchParams();
+  
 
   const mode = searchParams.get("mode") ?? "human";
 
@@ -181,6 +181,25 @@ if (winnerByTime) {
   popupSubtitle = "Game Drawn";
   popupEmoji = "🤝";
 }
+
+useEffect(() => {
+  // Create a fake history entry
+  window.history.pushState(null, "", window.location.href);
+
+  const handlePopState = () => {
+    // Show our dialog
+    setShowLeaveDialog(true);
+
+    // Stay on the current page
+    window.history.pushState(null, "", window.location.href);
+  };
+
+  window.addEventListener("popstate", handlePopState);
+
+  return () => {
+    window.removeEventListener("popstate", handlePopState);
+  };
+}, []);
 
 
 useEffect(() => {
@@ -379,7 +398,7 @@ function showMoveOptions(square: string) {
   if (isAiThinking) {
   return false;
 }
-  const piece = game.get(sourceSquare as any);
+  const piece = game.get(sourceSquare as Square);
 
   const isPromotion =
     piece?.type === "p" &&
@@ -488,9 +507,7 @@ console.log("👤 Human lastMove");
   }}
 />
      
-
-<div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 lg:flex-row lg:items-start lg:justify-center">
-        <BoardSection
+<div className="mx-auto flex w-full max-w-7xl min-w-0 flex-col gap-6 px-4 lg:flex-row lg:items-start lg:justify-center">        <BoardSection
         isAiThinking={isAiThinking}
           blackTime={formatTime(blackTime)}
           whiteTime={formatTime(whiteTime)}
@@ -600,21 +617,15 @@ console.log("👤 Human lastMove");
       }}
     />
      
-     <LeaveGameDialog
+    <LeaveGameDialog
   isOpen={showLeaveDialog}
-  onStay={() => {
-    setShowLeaveDialog(false);
-    setPendingNavigation(null);
-  }}
+  onStay={() => setShowLeaveDialog(false)}
   onLeave={() => {
     setShowLeaveDialog(false);
 
-    if (pendingNavigation) {
-      pendingNavigation();
-    }
+router.back();
   }}
 />
-
 <footer className="mt-3 border-t border-zinc-800 pt-2">
   <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-zinc-400">
     <span className="font-semibold text-zinc-300">
@@ -640,4 +651,11 @@ console.log("👤 Human lastMove");
     
   </main>
 );
+}
+export default function GamePage() {
+  return (
+    <Suspense fallback={<div>Loading game...</div>}>
+      <GamePageContent />
+    </Suspense>
+  );
 }

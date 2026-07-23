@@ -1,4 +1,4 @@
 declare module "stockfish" {
-  const Stockfish: any;
+  const Stockfish: () => Worker;
   export default Stockfish;
 }
