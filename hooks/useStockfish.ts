@@ -7,7 +7,6 @@ export function useStockfish() {
   useEffect(() => {
   engine.current = new StockfishEngine();
 
-  console.log("Stockfish engine created");
 
   return () => {
     engine.current?.terminate();

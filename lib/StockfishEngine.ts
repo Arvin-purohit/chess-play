@@ -3,14 +3,14 @@ export class StockfishEngine {
   private ready = false;
 
   constructor() {
-    console.log("🚀 Starting Stockfish...");
+
 
     this.worker = new Worker("/stockfish/stockfish-18-lite-single.js");
 
     this.worker.onmessage = (event) => {
       const message = event.data;
 
-      console.log("ENGINE >", message);
+    
 
       if (message === "uciok") {
         this.worker.postMessage("isready");
@@ -18,7 +18,7 @@ export class StockfishEngine {
 
       if (message === "readyok") {
         this.ready = true;
-        console.log("✅ Stockfish Ready");
+       
       }
     };
 
@@ -41,7 +41,7 @@ export class StockfishEngine {
       const listener = (event: MessageEvent) => {
         const message = event.data as string;
 
-        console.log("ENGINE >", message);
+        
 
         if (message.startsWith("bestmove")) {
           this.worker.removeEventListener("message", listener);

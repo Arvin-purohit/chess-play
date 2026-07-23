@@ -27,7 +27,6 @@ export function playSound(
 ) {
   if (typeof window === "undefined") return;
 
-  console.log("🔊 Playing sound:", type);
 
   const sound = getSounds()[type];
   sound.currentTime = 0;

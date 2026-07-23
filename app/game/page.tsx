@@ -469,7 +469,7 @@ aiMoveTimeout.current = setTimeout(() => {
    
 
     setActivePlayer(gameCopy.turn());
-console.log("👤 Human lastMove");
+
     setLastMove({
       from: sourceSquare,
       to: targetSquare,

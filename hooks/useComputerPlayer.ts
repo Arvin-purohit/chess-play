@@ -24,7 +24,7 @@ export async function playComputerMove({
   setActivePlayer,
   setIsAiThinking,
 }: PlayComputerMoveProps) {
-  console.log("🤖 playComputerMove called");
+  
 
   
   if (!engine.current) {
@@ -32,7 +32,7 @@ export async function playComputerMove({
     return;
   }
 
-  console.log("✅ Engine exists");
+ 
 
   engine.current.setSkill(difficulty);
 
@@ -43,7 +43,7 @@ const bestMove = await engine.current.getBestMove(
   settings.depth
 );
 
-  console.log("🎯 Best move:", bestMove);
+  
 
   if (!bestMove || bestMove === "(none)") {
   setIsAiThinking(false);
@@ -51,8 +51,7 @@ const bestMove = await engine.current.getBestMove(
 }
 
 
-  console.log("Current FEN:", game.fen());
-console.log("Current history:", game.history());
+
 const aiGame = new Chess();
 
 game.history({ verbose: true }).forEach((move) => {
@@ -81,11 +80,8 @@ if (aiGame.isCheck()) {
   playSound("check");
 }
   
-console.log("🤖 AI setGame");
   setGame(aiGame);
   
-console.log(aiGame.history());
-console.log("🤖 AI lastMove");
   setLastMove({
     from: bestMove.slice(0, 2),
     to: bestMove.slice(2, 4),
