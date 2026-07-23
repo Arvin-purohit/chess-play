@@ -53,11 +53,9 @@ export default function BoardSection({
     capturedByBlack
   );
   return (
-  <div className="flex items-start gap-4">
-
+<div className="flex w-full flex-col gap-4 lg:flex-row lg:items-start">
     {/* Left Side - Timers */}
-    <div className="flex w-36 flex-col justify-between self-stretch">
-
+<div className="flex w-full flex-row justify-between lg:w-36 lg:flex-col lg:self-stretch">
       <TimerCard
         player="Black"
         time={blackTime}
@@ -74,8 +72,7 @@ export default function BoardSection({
     </div>
 
     {/* Board */}
-    <div className="w-full max-w-[500px]">
-
+<div className="mx-auto w-full max-w-[500px] lg:mx-0">
       <div className="mb-2">
         <CapturedPieces
         title="Black"

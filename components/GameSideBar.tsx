@@ -17,8 +17,7 @@ export default function GameSidebar({
   onNewGame,
 }: GameSidebarProps) {
   return (
-    <div className="w-[320px] space-y-4">
-      <ControlPanel
+<div className="w-full lg:w-[320px] xl:w-[360px] space-y-4">      <ControlPanel
         onUndo={onUndo}
         onFlip={onFlip}
         onNewGame={onNewGame}
